@@ -21,13 +21,9 @@ struct Position {
   Position() = default;
   Position(double4_t r_) : r {r_} {}; 
   Position(double x_, double y_, double z_) : r {x_, y_, z_, 0.0} {};
-  // Position(double x_, double y_, double z_) : x {x_}, y {y_}, z {z_} {};
   Position(const double xyz[]) : r {xyz[0], xyz[1], xyz[2], 0.0} {};
-  // Position(const double xyz[]) : x {xyz[0]}, y {xyz[1]}, z {xyz[2]} {};
   Position(const vector<double>& xyz) : r {xyz[0], xyz[1], xyz[2], 0.0} {};
-  // Position(const vector<double>& xyz) : x {xyz[0]}, y {xyz[1]}, z {xyz[2]} {};
   Position(const array<double, 3>& xyz) : r {xyz[0], xyz[1], xyz[2]} {};
-  // Position(const array<double, 3>& xyz) : x {xyz[0]}, y {xyz[1]}, z {xyz[2]} {};
 
   // Unary operators
   Position& operator+=(Position);
@@ -43,30 +39,10 @@ struct Position {
   const double& operator[](int i) const
   {
       return r[i];
-    // switch (i) {
-    // case 0:
-    //   return x;
-    // case 1:
-    //   return y;
-    // case 2:
-    //   return z;
-    // default:
-    //   throw std::out_of_range {"Index in Position must be between 0 and 2."};
-    // }
   }
   double& operator[](int i)
   {
     return r[i];
-    // switch (i) {
-    // case 0:
-    //   return x;
-    // case 1:
-    //   return y;
-    // case 2:
-    //   return z;
-    // default:
-    //   throw std::out_of_range {"Index in Position must be between 0 and 2."};
-    // }
   }
 
   // Access to x, y, or z by compile time known index (specializations below)
@@ -90,7 +66,6 @@ struct Position {
   {
     double4_t dot_r = r * other.r;
     return dot_r[0] + dot_r[1] + dot_r[2];
-    // return x * other.x + y * other.y + z * other.z;
   }
   inline double norm() const { 
       double4_t square = r * r;
@@ -107,9 +82,6 @@ struct Position {
   Position rotate(const vector<double>& rotation) const;
 
   // Data members
-  // double x = 0.;
-  // double y = 0.;
-  // double z = 0.;
   double4_t r = { 0.0, 0.0, 0.0, 0.0 };
 };
 
@@ -118,34 +90,31 @@ template<>
 inline const double& Position::get<0>() const
 {
   return r[0];
-  // return x;
 }
 template<>
 inline const double& Position::get<1>() const
 {
   return r[1];
-  // return y;
 }
 template<>
 inline const double& Position::get<2>() const
 {
   return r[2];
-  // return z;
 }
 template<>
 inline double& Position::get<0>()
 {
-  return x;
+  return r[0];
 }
 template<>
 inline double& Position::get<1>()
 {
-  return y;
+  return r[1];
 }
 template<>
 inline double& Position::get<2>()
 {
-  return z;
+  return r[2];
 }
 
 // Binary operators
@@ -211,12 +180,12 @@ inline Position Position::reflect(Position n) const
 
 inline bool operator==(Position a, Position b)
 {
-  return a.x == b.x && a.y == b.y && a.z == b.z;
+  return a.r[0] == b.r[0] && a.r[1] == b.r[1] && a.r[2] == b.r[2];
 }
 
 inline bool operator!=(Position a, Position b)
 {
-  return a.x != b.x || a.y != b.y || a.z != b.z;
+  return a.r[0] != b.r[0] || a.r[1] != b.r[1] || a.r[2] != b.r[2];
 }
 
 std::ostream& operator<<(std::ostream& os, Position a);
