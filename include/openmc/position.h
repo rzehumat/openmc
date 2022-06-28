@@ -14,13 +14,20 @@ namespace openmc {
 //! Type representing a position in Cartesian coordinates
 //==============================================================================
 
+typedef double double4_t __attribute__ ((vector_size (4 * sizeof(double))));
+
 struct Position {
   // Constructors
   Position() = default;
-  Position(double x_, double y_, double z_) : x {x_}, y {y_}, z {z_} {};
-  Position(const double xyz[]) : x {xyz[0]}, y {xyz[1]}, z {xyz[2]} {};
-  Position(const vector<double>& xyz) : x {xyz[0]}, y {xyz[1]}, z {xyz[2]} {};
-  Position(const array<double, 3>& xyz) : x {xyz[0]}, y {xyz[1]}, z {xyz[2]} {};
+  Position(double4_t r_) : r {r_} {}; 
+  Position(double x_, double y_, double z_) : r {x_, y_, z_, 0.0} {};
+  // Position(double x_, double y_, double z_) : x {x_}, y {y_}, z {z_} {};
+  Position(const double xyz[]) : r {xyz[0], xyz[1], xyz[2], 0.0} {};
+  // Position(const double xyz[]) : x {xyz[0]}, y {xyz[1]}, z {xyz[2]} {};
+  Position(const vector<double>& xyz) : r {xyz[0], xyz[1], xyz[2], 0.0} {};
+  // Position(const vector<double>& xyz) : x {xyz[0]}, y {xyz[1]}, z {xyz[2]} {};
+  Position(const array<double, 3>& xyz) : r {xyz[0], xyz[1], xyz[2]} {};
+  // Position(const array<double, 3>& xyz) : x {xyz[0]}, y {xyz[1]}, z {xyz[2]} {};
 
   // Unary operators
   Position& operator+=(Position);
@@ -35,29 +42,31 @@ struct Position {
 
   const double& operator[](int i) const
   {
-    switch (i) {
-    case 0:
-      return x;
-    case 1:
-      return y;
-    case 2:
-      return z;
-    default:
-      throw std::out_of_range {"Index in Position must be between 0 and 2."};
-    }
+      return r[i];
+    // switch (i) {
+    // case 0:
+    //   return x;
+    // case 1:
+    //   return y;
+    // case 2:
+    //   return z;
+    // default:
+    //   throw std::out_of_range {"Index in Position must be between 0 and 2."};
+    // }
   }
   double& operator[](int i)
   {
-    switch (i) {
-    case 0:
-      return x;
-    case 1:
-      return y;
-    case 2:
-      return z;
-    default:
-      throw std::out_of_range {"Index in Position must be between 0 and 2."};
-    }
+    return r[i];
+    // switch (i) {
+    // case 0:
+    //   return x;
+    // case 1:
+    //   return y;
+    // case 2:
+    //   return z;
+    // default:
+    //   throw std::out_of_range {"Index in Position must be between 0 and 2."};
+    // }
   }
 
   // Access to x, y, or z by compile time known index (specializations below)
@@ -79,9 +88,15 @@ struct Position {
   //! \result Resulting dot product
   inline double dot(Position other) const
   {
-    return x * other.x + y * other.y + z * other.z;
+    double4_t dot_r = r * other.r;
+    return dot_r[0] + dot_r[1] + dot_r[2];
+    // return x * other.x + y * other.y + z * other.z;
   }
-  inline double norm() const { return std::sqrt(x * x + y * y + z * z); }
+  inline double norm() const { 
+      double4_t square = r * r;
+      return std::sqrt(square[0] + square[1] + square[2]); 
+  }
+  // inline double norm() const { return std::sqrt(x * x + y * y + z * z); }
 
   //! Reflect a direction across a normal vector
   //! \param[in] other Vector to reflect across
@@ -92,26 +107,30 @@ struct Position {
   Position rotate(const vector<double>& rotation) const;
 
   // Data members
-  double x = 0.;
-  double y = 0.;
-  double z = 0.;
+  // double x = 0.;
+  // double y = 0.;
+  // double z = 0.;
+  double4_t r = { 0.0, 0.0, 0.0, 0.0 };
 };
 
 // Compile-time known member index access functions
 template<>
 inline const double& Position::get<0>() const
 {
-  return x;
+  return r[0];
+  // return x;
 }
 template<>
 inline const double& Position::get<1>() const
 {
-  return y;
+  return r[1];
+  // return y;
 }
 template<>
 inline const double& Position::get<2>() const
 {
-  return z;
+  return r[2];
+  // return z;
 }
 template<>
 inline double& Position::get<0>()
